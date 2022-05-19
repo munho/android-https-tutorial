@@ -1,3 +1,46 @@
 안드로이드에서 https 요청하기와 응답받기 (SSLSocketFactory, HttpsURLConnection)
 
 http://webs.co.kr/?document_srl=365705
+
+
+  trustAllHosts();
+
+
+  HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url.openConnection();
+  httpsURLConnection.setHostnameVerifier(new HostnameVerifier() {
+      @Override
+      public boolean verify(String s, SSLSession sslSession) {
+          return true;
+      }
+  });
+  HttpURLConnection connection = httpsURLConnection;
+  
+  ...
+  
+  private static void trustAllHosts() {
+        // Create a trust manager that does not validate certificate chains
+        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new java.security.cert.X509Certificate[]{};
+            }
+
+            @Override
+            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) 
+                throws java.security.cert.CertificateException {
+            }
+
+            @Override
+            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType)
+                throws java.security.cert.CertificateException {
+            }
+        }};
+
+        // Install the all-trusting trust manager
+        try {
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
